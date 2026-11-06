@@ -1,0 +1,23 @@
+{
+  "filters": {
+    "and": [
+      "type == \"project\"",
+      "domain == \"Operations\""
+    ]
+  },
+  "views": [
+    {
+      "type": "table",
+      "name": "Operations projects",
+      "order": [
+        "file.name"
+      ],
+      "sort": [
+        {
+          "property": "file.name",
+          "direction": "ASC"
+        }
+      ]
+    }
+  ]
+}

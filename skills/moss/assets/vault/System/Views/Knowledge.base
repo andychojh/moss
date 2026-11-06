@@ -1,0 +1,14 @@
+{
+  "filters": "type == \"knowledge\" && wiki_layer == \"knowledge\"",
+  "views": [
+    {
+      "type": "table",
+      "name": "Reusable knowledge",
+      "order": [
+        "file.name",
+        "note.domain",
+        "note.evidence_as_of"
+      ]
+    }
+  ]
+}

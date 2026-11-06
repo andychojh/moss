@@ -1,0 +1,14 @@
+{
+  "items": [
+    {
+      "type": "file",
+      "path": "Home.md",
+      "title": "Moss Home"
+    },
+    {
+      "type": "file",
+      "path": "Knowledge Map.canvas",
+      "title": "Knowledge Map"
+    }
+  ]
+}

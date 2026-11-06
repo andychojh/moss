@@ -1,0 +1,16 @@
+{
+  "task_id": "sample-import-check",
+  "title": "CSV import preserves leading zeros",
+  "goal": "Keep product codes intact during import",
+  "outcome": "completed",
+  "evidence_as_of": "2026-01-01",
+  "facts": ["Synthetic fixture code 00123 remained a string after import."],
+  "decisions": ["Parse the product-code column as text."],
+  "failures": ["Numeric inference dropped leading zeros in the synthetic fixture."],
+  "fixes": ["Added an explicit text dtype for product codes."],
+  "verification": ["Example only: replace with checks you actually ran."],
+  "unverified": ["Example only: production files were not inspected."],
+  "sources": ["Example only: replace with the actual source or test-log path."],
+  "reuse_conditions": ["Use when an identifier's spelling matters more than its numeric value."],
+  "next_steps": []
+}

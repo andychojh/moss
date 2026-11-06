@@ -1,0 +1,156 @@
+{
+  "nodes": [
+    {
+      "id": "intro",
+      "type": "text",
+      "x": 0,
+      "y": -220,
+      "width": 1320,
+      "height": 150,
+      "text": "# Moss\nSmall notes. Long memory.\n\nOpen a domain to find your projects. Follow the flow to reuse what you learn."
+    },
+    {
+      "id": "domain-0",
+      "type": "file",
+      "file": "Areas/Research.md",
+      "x": 0,
+      "y": 0,
+      "width": 300,
+      "height": 240,
+      "color": "#4879C4"
+    },
+    {
+      "id": "domain-1",
+      "type": "file",
+      "file": "Areas/Development.md",
+      "x": 340,
+      "y": 0,
+      "width": 300,
+      "height": 240,
+      "color": "#35A38B"
+    },
+    {
+      "id": "domain-2",
+      "type": "file",
+      "file": "Areas/Competitions.md",
+      "x": 680,
+      "y": 0,
+      "width": 300,
+      "height": 240,
+      "color": "#DE9745"
+    },
+    {
+      "id": "domain-3",
+      "type": "file",
+      "file": "Areas/Learning.md",
+      "x": 1020,
+      "y": 0,
+      "width": 300,
+      "height": 240,
+      "color": "#8672BD"
+    },
+    {
+      "id": "domain-4",
+      "type": "file",
+      "file": "Areas/Admissions.md",
+      "x": 0,
+      "y": 300,
+      "width": 300,
+      "height": 240,
+      "color": "#CF7895"
+    },
+    {
+      "id": "domain-5",
+      "type": "file",
+      "file": "Areas/Investing.md",
+      "x": 340,
+      "y": 300,
+      "width": 300,
+      "height": 240,
+      "color": "#619846"
+    },
+    {
+      "id": "domain-6",
+      "type": "file",
+      "file": "Areas/Creative.md",
+      "x": 680,
+      "y": 300,
+      "width": 300,
+      "height": 240,
+      "color": "#A98A61"
+    },
+    {
+      "id": "domain-7",
+      "type": "file",
+      "file": "Areas/Operations.md",
+      "x": 1020,
+      "y": 300,
+      "width": 300,
+      "height": 240,
+      "color": "#7D8897"
+    },
+    {
+      "id": "step-0",
+      "type": "text",
+      "x": 0,
+      "y": 660,
+      "width": 280,
+      "height": 180,
+      "text": "## Sources\nOriginal papers, code and logs.\nKeep them with their project.",
+      "color": "#2D9D9D"
+    },
+    {
+      "id": "step-1",
+      "type": "text",
+      "x": 340,
+      "y": 660,
+      "width": 280,
+      "height": 180,
+      "text": "## Records\nDated decisions and checks.\n[[System/Records|Find records]]",
+      "color": "#2D9D9D"
+    },
+    {
+      "id": "step-2",
+      "type": "text",
+      "x": 680,
+      "y": 660,
+      "width": 280,
+      "height": 180,
+      "text": "## Knowledge\nEvidence, scope and exceptions.\n[[Knowledge/Read me first|Grow knowledge]]",
+      "color": "#2D9D9D"
+    },
+    {
+      "id": "step-3",
+      "type": "text",
+      "x": 1020,
+      "y": 660,
+      "width": 280,
+      "height": 180,
+      "text": "## Apply\nLink the principle.\nRecord your different conditions and results.",
+      "color": "#2D9D9D"
+    }
+  ],
+  "edges": [
+    {
+      "id": "flow-0",
+      "fromNode": "step-0",
+      "fromSide": "right",
+      "toNode": "step-1",
+      "toSide": "left"
+    },
+    {
+      "id": "flow-1",
+      "fromNode": "step-1",
+      "fromSide": "right",
+      "toNode": "step-2",
+      "toSide": "left"
+    },
+    {
+      "id": "flow-2",
+      "fromNode": "step-2",
+      "fromSide": "right",
+      "toNode": "step-3",
+      "toSide": "left"
+    }
+  ]
+}

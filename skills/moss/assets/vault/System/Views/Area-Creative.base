@@ -1,0 +1,23 @@
+{
+  "filters": {
+    "and": [
+      "type == \"project\"",
+      "domain == \"Creative\""
+    ]
+  },
+  "views": [
+    {
+      "type": "table",
+      "name": "Creative projects",
+      "order": [
+        "file.name"
+      ],
+      "sort": [
+        {
+          "property": "file.name",
+          "direction": "ASC"
+        }
+      ]
+    }
+  ]
+}

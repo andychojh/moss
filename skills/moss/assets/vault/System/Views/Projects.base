@@ -1,0 +1,17 @@
+{
+  "filters": "type == \"project\"",
+  "views": [
+    {
+      "type": "table",
+      "name": "Projects",
+      "order": [
+        "file.name",
+        "note.domain"
+      ],
+      "groupBy": {
+        "property": "note.domain",
+        "direction": "ASC"
+      }
+    }
+  ]
+}
