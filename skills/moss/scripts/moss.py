@@ -12,7 +12,7 @@ import tempfile
 from contextlib import contextmanager
 from datetime import date, datetime, timezone
 
-VERSION = '0.2.0'
+VERSION = '0.3.0'
 SKILL = Path(__file__).resolve().parents[1]
 PALETTE = ('#4879C4', '#35A38B', '#DE9745', '#8672BD', '#CF7895', '#619846', '#A98A61', '#7D8897')
 FIELDS = ('facts', 'decisions', 'failures', 'fixes', 'verification', 'unverified', 'sources', 'reuse_conditions', 'next_steps')

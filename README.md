@@ -18,7 +18,7 @@ Your agent fixed this last week. Let it remember *why*.
 — try setup, revisions, domain colors and ready-to-copy prompts in your browser.
 The [downloadable HTML](skills/moss/references/guide.ko.html) also works offline; examples never write to your vault.
 
-Moss is a self-contained Codex skill with an **empty vault, guided setup,
+Moss is a self-contained Codex skill with **existing-vault adoption, an optional empty vault, guided setup,
 standing instructions and a verification command**. It stores dated decisions,
 failed approaches and real checks in readable files. Shared principles get one
 home; projects keep their own context. **Your work defines the categories.**
@@ -37,15 +37,17 @@ flowchart LR
 Paste this into Codex:
 
 > Install the skill from https://github.com/andychojh/moss/tree/main/skills/moss.
-> Ask what work I want to remember and help me choose useful categories, or none.
-> Then use $moss to create a new Obsidian vault in my Documents folder named Moss,
-> enable project memory in my Codex instructions, and verify the setup.
+> Use $moss to inspect my existing Obsidian vault and its rules. Propose categories
+> that fit my notes, tidy filenames while preserving meaningful dates and identifiers,
+> and reorganize with a preview, full backup, updated links and preservation checks.
+> Keep my existing vault path, connect relevant notes to project hubs, then enable
+> future project memory in Codex and verify it. If I have no vault, create a new one.
 
 You'll need **Python 3.10+** and **Obsidian** to browse the vault. Moss itself uses
 only Python's standard library: no pip install, API key or community plugin.
 The agent needs permission to read/write your chosen local paths.
 
-After setup, open the generated folder as a vault in Obsidian and open **Home**.
+After adoption or setup, open the configured folder as a vault in Obsidian and open **Home**.
 If the skill is not yet discovered, start a new Codex session and ask for `$moss`.
 Skill installation does not execute scripts by itself; the setup request above
 is what initializes the vault and connects the instructions.
@@ -62,6 +64,7 @@ Manual commands and recovery are in the [setup guide](skills/moss/references/set
 | **Readable records** | `CSV import preserves leading zeros — 2026-01-01.md` |
 | **Shared knowledge** | Keep one principle, link its evidence and applications |
 | **Canvas + colored graph** | See the structure without flooding it with every log |
+| **Migration preview** | See filename/folder changes before activation; retain originals |
 | **Setup + doctor** | Connect local paths and instructions, then check structure |
 
 The template is empty. The sample input is **synthetic**, lives outside the vault,
@@ -85,7 +88,10 @@ Old bodies are preserved. “Latest” means last saved, not proven true.
 
 ## Your files, your garden
 
-- Setup uses a **new or empty vault**; it refuses to merge a personal vault.
+- **Existing vault:** audit → reviewed plan → complete preview → verified activation at the original path, with a full original backup. See [migration](skills/moss/references/existing-vault.md).
+- **Fresh start:** setup uses a new/empty vault. No prescribed categories.
+- Filenames can be renamed and Markdown notes moved; standard links and Canvas references follow. H1/frontmatter, plugin queries and external incoming links require agent review.
+- Existing content is preserved; similar notes are never automatically merged or deleted.
 - Existing Codex instructions are backed up; only a marked Moss block is edited.
 - Machine paths live outside the skill in `~/.moss/config.json`.
 - Records stay local. Cloud sync, other AI tools and publishing are separate choices.

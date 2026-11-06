@@ -1,4 +1,4 @@
 interface:
   display_name: "Moss"
   short_description: "Grow useful project memory in Obsidian"
-  default_prompt: "Use $moss to set up local Obsidian memory, read relevant project lessons, and record useful decisions and checks."
+  default_prompt: "Use $moss to organize my existing Obsidian vault with readable filenames, preserved sources and verified links, then connect ongoing project memory. Create a new vault only if needed."

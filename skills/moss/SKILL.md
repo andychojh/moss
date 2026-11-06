@@ -1,6 +1,6 @@
 ---
 name: moss
-description: Set up and use local Obsidian project memory for Codex. Retrieve relevant dated lessons at project starts and save evidence-linked decisions, failures and checks at meaningful milestones. Includes an empty vault, setup, standing instructions and verification.
+description: Set up and use local Obsidian project memory for Codex. Retrieve relevant dated lessons at project starts and save evidence-linked decisions, failures and checks at meaningful milestones. Reorganize existing vaults with readable filenames, preserved sources and updated links; also supports empty-vault setup, standing instructions and verification.
 ---
 
 # Moss
@@ -27,7 +27,15 @@ start immediately, use no categories. Choose useful boundaries, not an exhaustiv
 classification of their life. Record depth and milestone frequency should match
 their workflow; keep evidence, uncertainty and revision preservation invariant.
 
-When the user asks to set up Moss, choose their requested **new/empty** vault or
+When the user already has an Obsidian vault, default to **adopting that existing
+vault in place**, not starting a second knowledge store. Read
+[existing-vault migration](references/existing-vault.md) first. Audit actual notes,
+propose a personalized structure and readable filenames, prepare a separate copy,
+verify links and preserved files, then activate with a complete original backup.
+The filename tool preserves H1/frontmatter; review those separately where needed.
+After adoption, connect existing notes to project hubs and enable future recording.
+
+Only when the user has no vault or explicitly wants a fresh start, choose a **new/empty** vault or
 default to `~/Documents/Moss`. For requested standing integration, use the user's
 Codex home `AGENTS.md` (`CODEX_HOME`, otherwise `~/.codex`). Run:
 
@@ -43,7 +51,8 @@ language labels, colors and v0.1 compatibility. `domains` lists the actual choic
 
 Setup edits only its marked instruction block, backs up changed preexisting
 instructions, and refuses a nonempty unmanaged vault or a competing memory block.
-Do not merge an existing personal vault, alter other AI configurations, or install
+Use the migration workflow for existing vaults; never bypass setup’s nonempty check.
+Do not alter other AI configurations or install
 Python/Obsidian without the user's scope covering it. If they only want explicit
 invocation, omit `--instructions`. Installation alone does not run setup.
 

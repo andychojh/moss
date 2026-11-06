@@ -1,3 +1,8 @@
+# Existing notes first
+
+If the user has an existing vault, use [existing-vault migration](existing-vault.md).
+The `setup` command below is only for new/empty or already Moss-managed vaults.
+
 # Setup & recovery
 
 The repository contains an installable skill at `skills/moss`. Install that whole
