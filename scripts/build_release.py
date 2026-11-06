@@ -3,6 +3,7 @@ from pathlib import Path
 import hashlib
 import json
 import zipfile
+import runpy
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED = ('README.md', 'LICENSE', '.gitignore', '.gitattributes', '.github/workflows/test.yml', 'skills/moss', 'tests', 'scripts/build_release.py', 'scripts/build_site.py', 'docs')
@@ -15,7 +16,8 @@ def main():
         files.extend([path] if path.is_file() else [p for p in path.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix != '.pyc'])
     target = ROOT / 'dist'
     target.mkdir(exist_ok=True)
-    archive = target / 'moss-0.1.0.zip'
+    version = runpy.run_path(str(ROOT / 'skills/moss/scripts/moss.py'))['VERSION']
+    archive = target / ('moss-' + version + '.zip')
     manifest = []
     with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as z:
         for path in sorted(files):

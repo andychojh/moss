@@ -18,6 +18,15 @@ community plugins are needed. Locate `scripts/moss.py` relative to this file.
 Configuration lives outside the skill in `~/.moss/config.json` (override with
 `MOSS_CONFIG` or the global `--config` option before the subcommand).
 
+Before choosing categories, read the user's stated goals and permitted project
+context. If needed, ask one short onboarding question about the work they want to
+remember, their preferred language and whether they want categories now or later.
+Offer a small proposed structure based on that answer; do not install the author's
+interests or treat an example persona as a mandatory preset. If the user wants to
+start immediately, use no categories. Choose useful boundaries, not an exhaustive
+classification of their life. Record depth and milestone frequency should match
+their workflow; keep evidence, uncertainty and revision preservation invariant.
+
 When the user asks to set up Moss, choose their requested **new/empty** vault or
 default to `~/Documents/Moss`. For requested standing integration, use the user's
 Codex home `AGENTS.md` (`CODEX_HOME`, otherwise `~/.codex`). Run:
@@ -26,6 +35,11 @@ Codex home `AGENTS.md` (`CODEX_HOME`, otherwise `~/.codex`). Run:
 python <skill>/scripts/moss.py setup --vault <absolute-vault> --instructions <absolute-AGENTS.md>
 python <skill>/scripts/moss.py doctor
 ```
+
+The default vault has **zero preset domains**. For chosen categories, prepare a
+profile and pass `--profile <json>` to setup, or run `configure --profile <json>`
+later. Read [personalization](references/personalization.md) for the exact schema,
+language labels, colors and v0.1 compatibility. `domains` lists the actual choices.
 
 Setup edits only its marked instruction block, backs up changed preexisting
 instructions, and refuses a nonempty unmanaged vault or a competing memory block.
@@ -44,11 +58,14 @@ project notes and records remain readable as Markdown.
    --project <absolute-root>`. It is read-only. If several projects share a root,
    select the correct `--key`. An unregistered descendant does not inherit its
    parent's project identity.
-2. For a new project, register a meaningful title/key and one domain using
+2. For a new project, register a meaningful title/key and an optional domain using
    `register --project <root> --key <key> --title <title> --domain <domain>`.
-   Domains: Research, Development, Competitions, Learning, Admissions, Investing,
-   Creative, Operations, Unsorted. Infer the domain when clear; use Unsorted when
-   genuinely unresolved. Do not duplicate an existing project.
+   Use `domains` to read this user's categories. If none fits, propose or add a
+   useful category within their request using `configure`; do not force it into
+   an unrelated one. Omit `--domain` for Unsorted, created only when needed.
+   Keep category IDs stable; labels can be in the user's language. Do not
+   duplicate an existing project. Categories route projects; they do not limit
+   what topics sources, records or shared knowledge may contain.
 3. Read the hub, relevant records and their original evidence. Recent records are
    pointers, not a relevance search or a verified current-state summary. Search
    targeted titles/symptoms instead of loading the entire vault.

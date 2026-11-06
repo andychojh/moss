@@ -5,7 +5,8 @@ folder, not just `SKILL.md`. The bundled template contains no project records.
 
 ## One guided setup
 
-Ask Codex: “Use $moss to create a new vault at [absolute path], enable project
+Ask Codex: “Install $moss, ask what work I want to remember and help me choose
+useful categories (or none). Create a new vault at [absolute path], enable project
 memory in my Codex instructions, and verify the installation.” Codex resolves
 its installed script location and runs setup and doctor. No API key is needed.
 Using Codex itself remains subject to your usual account and service terms.
@@ -30,6 +31,9 @@ Bases, Canvas and Graph features if your installation has them disabled. No
 community plugin is installed. New project notes are found by the domain tables;
 new logs appear in their project's table. The global graph hides logs/navigation
 so a growing log does not become a giant hub.
+
+New vaults have no preset subject areas. See [personalization](personalization.md)
+to set labels and colors, add categories later, or retain a v0.1 vault safely.
 
 ## What is checked
 

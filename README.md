@@ -21,7 +21,8 @@ The [downloadable HTML](skills/moss/references/guide.ko.html) also works offline
 Moss is a self-contained Codex skill with an **empty vault, guided setup,
 standing instructions and a verification command**. It stores dated decisions,
 failed approaches and real checks in readable files. Shared principles get one
-home; projects keep their own context.
+home; projects keep their own context. **Your work defines the categories.**
+New vaults contain no preset domains; names, colors and category count are yours.
 
 ```mermaid
 flowchart LR
@@ -36,6 +37,7 @@ flowchart LR
 Paste this into Codex:
 
 > Install the skill from https://github.com/andychojh/moss/tree/main/skills/moss.
+> Ask what work I want to remember and help me choose useful categories, or none.
 > Then use $moss to create a new Obsidian vault in my Documents folder named Moss,
 > enable project memory in my Codex instructions, and verify the setup.
 
@@ -55,7 +57,7 @@ Manual commands and recovery are in the [setup guide](skills/moss/references/set
 
 | Piece | Purpose |
 |---|---|
-| **Home + eight domains** | Find the right project without one enormous link hub |
+| **Home + your own areas** | Start uncategorized or choose the categories that fit your work |
 | **Project hubs + native Bases** | Browse latest records or the full revision history |
 | **Readable records** | `CSV import preserves leading zeros — 2026-01-01.md` |
 | **Shared knowledge** | Keep one principle, link its evidence and applications |
@@ -90,9 +92,10 @@ Old bodies are preserved. “Latest” means last saved, not proven true.
 - `doctor` checks structure and revision consistency, not the truth of your research.
 - Cross-project synthesis is agent work; the file writer does not invent connections.
 
-The graph colors are blue/Research, teal/Development, orange/Competitions,
-purple/Learning, pink/Admissions, green/Investing, tan/Creative, slate/Operations,
-and dark teal/Shared knowledge. Logs are hidden in the default global graph and
+Choose your own domain labels and colors during setup or later; there is no
+eight-domain limit. `Unsorted` is created only when needed. See
+[personalization and v0.1 upgrades](skills/moss/references/personalization.md).
+Logs are hidden in the default global graph and
 remain available in project tables and filtered/local graphs.
 
 ## Check it or hack it

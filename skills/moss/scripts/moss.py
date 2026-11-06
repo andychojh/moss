@@ -12,9 +12,9 @@ import tempfile
 from contextlib import contextmanager
 from datetime import date, datetime, timezone
 
-VERSION = '0.1.0'
+VERSION = '0.2.0'
 SKILL = Path(__file__).resolve().parents[1]
-DOMAINS = ('Research', 'Development', 'Competitions', 'Learning', 'Admissions', 'Investing', 'Creative', 'Operations', 'Unsorted')
+PALETTE = ('#4879C4', '#35A38B', '#DE9745', '#8672BD', '#CF7895', '#619846', '#A98A61', '#7D8897')
 FIELDS = ('facts', 'decisions', 'failures', 'fixes', 'verification', 'unverified', 'sources', 'reuse_conditions', 'next_steps')
 BEGIN, END = '<!-- MOSS:BEGIN -->', '<!-- MOSS:END -->'
 
@@ -149,7 +149,9 @@ def instructions(path, config):
     return old, new
 
 
-def setup(config, vault, agents=None):
+def setup(config, vault, agents=None, profile=None):
+    if profile is not None:
+        validate_profile(profile)  # reject bad input before creating any files
     vault = absolute(vault)
     config = absolute(config)
     if vault == Path(vault.anchor) or vault == Path.home().resolve():
@@ -192,7 +194,143 @@ def setup(config, vault, agents=None):
                 write(agents, new)
             settings['instructions'] = str(agents)
         save(config, settings)
-    return {'status': 'ready', 'vault': str(vault), 'instructions': settings.get('instructions'), 'doctor': doctor(config)}
+    customization = configure(config, profile) if profile is not None else None
+    return {'status': 'ready', 'vault': str(vault), 'instructions': settings.get('instructions'), 'customization': customization, 'doctor': doctor(config)}
+
+
+def domain_id(value):
+    if not isinstance(value, str) or not re.fullmatch(r'[A-Za-z][A-Za-z0-9-]{0,47}', value):
+        raise ValueError('Domain id must start with a letter and use letters, digits or hyphens (max 48)')
+    if title(value) != value or value.casefold() == 'shared':
+        raise ValueError('Reserved domain id: ' + value)
+    if value.casefold() == 'unsorted' and value != 'Unsorted':
+        raise ValueError('Use the canonical fallback id Unsorted')
+    return value
+
+
+def validate_profile(profile):
+    if not isinstance(profile, dict) or set(profile) != {'domains'} or not isinstance(profile['domains'], list):
+        raise ValueError('Profile must contain a domains array')
+    seen = set()
+    for d in profile['domains']:
+        if not isinstance(d, dict) or set(d) != {'id', 'label', 'color'}:
+            raise ValueError('Each domain needs id, label and color')
+        domain_id(d['id'])
+        if d['id'].casefold() in seen:
+            raise ValueError('Duplicate domain id (case-insensitive)')
+        seen.add(d['id'].casefold())
+        if not isinstance(d['label'], str) or not d['label'].strip() or len(d['label']) > 80 or re.search(r'[\r\n\[\]|<>\x00-\x1f]', d['label']):
+            raise ValueError('Use a short, single-line domain label without markup delimiters')
+        if not isinstance(d['color'], str) or not re.fullmatch(r'#[0-9a-fA-F]{6}', d['color']):
+            raise ValueError('Use a six-digit hex color such as #4879C4')
+
+
+def domain_state(vault, reg):
+    path = vault / 'System/domains.json'
+    if path.exists():
+        state = read_json(path)
+        if state.get('format') != 1 or not isinstance(state.get('generated'), dict):
+            raise ValueError('Unsupported domain registry')
+        validate_profile({'domains': state['domains']})
+        return state
+    # v0.1 compatibility: infer the existing taxonomy, never import the author's list.
+    ids = {p['domain'] for p in reg['projects'].values()}
+    for area in (vault / 'Areas').glob('*.md'):
+        meta, _ = parse_note(area)
+        if meta.get('domain'):
+            ids.add(meta['domain'])
+    graph = read_json(vault / '.obsidian/graph.json')
+    colors = {g['query']: g.get('color', {}).get('rgb') for g in graph.get('colorGroups', [])}
+    domains = []
+    for i, value in enumerate(sorted(ids)):
+        domain_id(value)
+        rgb = colors.get('[domain:' + value + ']')
+        color = '#%06X' % rgb if isinstance(rgb, int) and 0 <= rgb <= 0xFFFFFF else PALETTE[i % len(PALETTE)]
+        domains.append({'id': value, 'label': value, 'color': color})
+    return {'format': 1, 'domains': domains, 'generated': {}}
+
+
+def domains(config):
+    vault, reg, _ = load(config)
+    return {'domains': domain_state(vault, reg)['domains'], 'writes': False}
+
+
+def configure(config, profile):
+    """Merge labels/colors/categories, without moving projects or editing record bodies."""
+    validate_profile(profile)
+    vault, _, _ = load(config)
+    with lock(vault / 'System/.write-lock'):
+        vault, reg, _ = load(config)
+        state = domain_state(vault, reg)
+        pending = state.get('pending')
+        if pending and pending['profile'] != profile:
+            raise ValueError('Interrupted category update; retry its exact profile first')
+        merged = {d['id']: dict(d) for d in state['domains']}
+        for d in profile['domains']:
+            if any(k.casefold() == d['id'].casefold() and k != d['id'] for k in merged):
+                raise ValueError('Domain id differs only in case from an existing id')
+            merged[d['id']] = dict(d)
+        desired = list(merged.values())
+        planned = {}
+        rows, nodes = [], []
+        for i, d in enumerate(desired):
+            ident, label = d['id'], d['label']
+            area = f'Areas/{ident}.md'
+            view = f'System/Views/Area-{ident}.base'
+            # Existing area prose and views stay user-owned, including v0.1 material.
+            if not (vault / view).exists() or view in state['generated']:
+                planned[view] = json.dumps({'filters': {'and': ['type == "project"', 'domain == ' + json.dumps(ident)]}, 'views': [{'type': 'table', 'name': 'Projects', 'order': ['file.name']}]}, indent=2) + '\n'
+            if not (vault / area).exists() or area in state['generated']:
+                planned[area] = note({'type': 'navigation', 'domain': ident, 'wiki_layer': 'navigation', 'graph_role': 'navigation'}, '# ' + label + '\n\n![[' + view + ']]')
+            rows.append('| [[' + area[:-3] + '|' + label + ']] | `' + ident + '` | `' + d['color'] + '` |')
+            nodes.append({'id': 'domain-' + ident, 'type': 'file', 'file': area, 'x': (i % 3) * 340, 'y': (i // 3) * 280, 'width': 300, 'height': 220, 'color': d['color']})
+        body = '# Your areas\n\nLabels and colors come from `System/domains.json`. Add only categories that help you find your work.\n\n'
+        body += '| Area | Stable ID | Color |\n|---|---|---|\n' + '\n'.join(rows) if rows else 'No categories yet. Start with a project; use Unsorted until a useful distinction emerges.'
+        planned['System/Areas.md'] = note({'type': 'navigation', 'wiki_layer': 'navigation', 'graph_role': 'navigation'}, body)
+        if not nodes:
+            nodes = [{'id': 'empty', 'type': 'text', 'text': 'No categories yet. Add your own when useful.', 'x': 0, 'y': 0, 'width': 480, 'height': 180}]
+        planned['System/Domain Map.canvas'] = json.dumps({'nodes': nodes, 'edges': []}, ensure_ascii=False, indent=2) + '\n'
+        generated = dict(state['generated'])
+        # Only generated navigation is replaceable, and only while unedited.
+        for rel in planned:
+            path = inside(vault, rel)
+            if path.exists() and path.read_text('utf-8') != planned[rel]:
+                if digest(path.read_bytes()) not in {generated.get(rel), (pending or {}).get('before', {}).get(rel)}:
+                    raise ValueError('User-edited navigation preserved: ' + rel + '; reconcile it before configuring')
+        graph_path = vault / '.obsidian/graph.json'
+        graph = read_json(graph_path)
+        replacements = {'[domain:' + d['id'] + ']': {'query': '[domain:' + d['id'] + ']', 'color': {'a': 1, 'rgb': int(d['color'][1:], 16)}} for d in desired}
+        groups = []
+        for group in graph.get('colorGroups', []):
+            query = group.get('query')
+            if query in replacements:
+                groups.append(replacements.pop(query))
+            elif query not in {'[domain:' + d['id'] + ']' for d in desired}:
+                groups.append(group)
+        groups.extend(replacements.values())
+        graph['colorGroups'] = groups
+        planned['.obsidian/graph.json'] = json.dumps(graph, ensure_ascii=False, indent=2) + '\n'
+        home = (vault / 'Home.md').read_text('utf-8')
+        if '[[System/Areas' not in home:
+            planned['Home.md'] = home.rstrip() + '\n\n## Your areas\n\n[[System/Areas|Browse your categories]] · [[System/Domain Map.canvas|Your category map]]\n'
+        before = dict(generated)
+        for rel in planned:
+            if rel in ('Home.md', '.obsidian/graph.json'):
+                continue
+            generated[rel] = digest(planned[rel].encode('utf-8'))
+        old = vault / 'System/domains.json'
+        if old.exists():
+            backup = vault / 'System/Backups' / ('domains-' + digest(old.read_bytes())[:16] + '.json')
+            if not backup.exists():
+                write(backup, old.read_text('utf-8'))
+        save(old, {'format': 1, 'domains': desired, 'generated': generated,
+                   'pending': {'profile': profile, 'before': (pending or {}).get('before', before)}})
+        for rel, content in planned.items():
+            path = inside(vault, rel)
+            if not path.exists() or path.read_text('utf-8') != content:
+                write(path, content)
+        save(old, {'format': 1, 'domains': desired, 'generated': generated})
+    return {'status': 'configured', 'domains': desired, 'preserved': 'Existing projects, records, area prose, Canvas and unrelated graph settings'}
 
 
 def project_root(value):
@@ -233,11 +371,18 @@ def support(vault, chosen, p):
                         '# ' + p['title'] + '\n\nRead relevant records and their sources before resuming. The last draft is not verified current truth.\n\n![[System/Views/' + chosen + '.base]]\n\n## Shared knowledge\nLink principles only when you can explain the relationship.'))
 
 
-def register(config, root, chosen, name, domain):
+def register(config, root, chosen, name, domain='Unsorted'):
     root, chosen, name = project_root(root), key(chosen), title(name)
-    if domain not in DOMAINS:
-        raise ValueError('Unknown domain')
-    vault, _, _ = load(config)
+    domain_id(domain)
+    vault, reg, _ = load(config)
+    state = domain_state(vault, reg)
+    if state.get('pending'):
+        raise ValueError('Retry the interrupted configure profile before registering projects')
+    known = {d['id'] for d in state['domains']}
+    if domain not in known:
+        if domain != 'Unsorted':
+            raise ValueError('Domain is not configured; use configure --profile before registering it')
+        configure(config, {'domains': [{'id': 'Unsorted', 'label': 'Unsorted', 'color': '#7D8897'}]})
     with lock(vault / 'System/.write-lock'):
         vault, reg, _ = load(config)
         p = {'title': name, 'domain': domain, 'root': str(root), 'hub': f'Projects/{domain}/{name}.md', 'folder': f'Records/{domain}/{name}'}
@@ -344,12 +489,30 @@ def record(config, root, data, chosen=None):
 def doctor(config):
     vault, reg, settings = load(config)
     errors, warnings = [], []
+    state = domain_state(vault, reg)
+    known = {d['id'] for d in state['domains']}
+    if state.get('pending'):
+        errors.append('Interrupted category update; retry the exact configure profile')
+    if not (vault / 'System/domains.json').exists():
+        warnings.append('Legacy taxonomy detected; configure --profile imports it without moving records')
+    else:
+        graph = read_json(vault / '.obsidian/graph.json')
+        colors = {g.get('query'): g.get('color', {}).get('rgb') for g in graph.get('colorGroups', [])}
+        for d in state['domains']:
+            if not (vault / ('Areas/' + d['id'] + '.md')).is_file():
+                errors.append('Missing domain area: ' + d['id'])
+            if not (vault / ('System/Views/Area-' + d['id'] + '.base')).is_file():
+                errors.append('Missing domain view: ' + d['id'])
+            if colors.get('[domain:' + d['id'] + ']') != int(d['color'][1:], 16):
+                warnings.append('Graph color differs from domain registry: ' + d['id'])
     for rel in ('Home.md', 'Knowledge Map.canvas', 'System/Rules.md', 'System/Views/Projects.base', '.obsidian/graph.json'):
         if not inside(vault, rel).is_file():
             errors.append('Missing ' + rel)
     count = 0
     for chosen, p in reg['projects'].items():
         key(chosen)
+        if p['domain'] not in known:
+            errors.append('Unknown project domain: ' + chosen)
         if not inside(vault, p['hub']).exists() or not inside(vault, 'System/Views/' + chosen + '.base').exists():
             errors.append('Missing hub or view: ' + chosen)
         if not Path(p['root']).is_dir():
@@ -384,7 +547,7 @@ def doctor(config):
             errors.append('Moss instruction block missing or stale; rerun setup with --instructions')
     else:
         warnings.append('Standing instructions not enabled; invoke $moss explicitly')
-    return {'ok': not errors, 'projects': len(reg['projects']), 'records': count, 'errors': errors, 'warnings': warnings, 'scope': 'Structure, routing and revision flags; not factual accuracy or every note link.'}
+    return {'ok': not errors, 'projects': len(reg['projects']), 'domains': len(known), 'records': count, 'errors': errors, 'warnings': warnings, 'scope': 'Structure, routing and revision flags; not factual accuracy or every note link.'}
 
 
 def main():
@@ -395,22 +558,30 @@ def main():
     init = sub.add_parser('setup')
     init.add_argument('--vault', required=True)
     init.add_argument('--instructions', help='Explicit AGENTS.md target; omitted means no instruction edits')
+    init.add_argument('--profile', type=Path)
     sub.add_parser('doctor')
+    sub.add_parser('domains')
+    customize = sub.add_parser('configure')
+    customize.add_argument('--profile', type=Path, required=True)
     for mode in ('start', 'register', 'record'):
         cmd = sub.add_parser(mode)
         cmd.add_argument('--project', required=True)
         cmd.add_argument('--key', required=mode == 'register')
         if mode == 'register':
             cmd.add_argument('--title', required=True)
-            cmd.add_argument('--domain', choices=DOMAINS, required=True)
+            cmd.add_argument('--domain', default='Unsorted')
         if mode == 'record':
             cmd.add_argument('--input', type=Path, required=True)
     args = parser.parse_args()
     try:
         if args.command == 'setup':
-            result = setup(args.config, args.vault, args.instructions)
+            result = setup(args.config, args.vault, args.instructions, read_json(args.profile) if args.profile else None)
         elif args.command == 'doctor':
             result = doctor(args.config)
+        elif args.command == 'domains':
+            result = domains(args.config)
+        elif args.command == 'configure':
+            result = configure(args.config, read_json(args.profile))
         elif args.command == 'start':
             result = start(args.config, args.project, args.key)
         elif args.command == 'register':

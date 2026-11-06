@@ -29,7 +29,95 @@ class MossTests(unittest.TestCase):
         return m.setup(self.config, self.vault, self.agents)
 
     def register(self, key='demo'):
+        m.configure(self.config, {'domains': [{'id': 'Development', 'label': 'Development', 'color': '#35A38B'}]})
         return m.register(self.config, self.project, key, 'Demo ' + key, 'Development')
+
+    def test_neutral_start_and_lazy_unsorted(self):
+        self.setup()
+        self.assertEqual(m.domains(self.config)['domains'], [])
+        self.assertEqual(list((self.vault / 'Areas').glob('*.md')), [])
+        m.register(self.config, self.project, 'first', 'First project')
+        self.assertEqual(m.domains(self.config)['domains'][0]['id'], 'Unsorted')
+        self.assertTrue(m.doctor(self.config)['ok'])
+
+    def test_custom_taxonomy_has_no_eight_domain_limit(self):
+        profile = {'domains': [{'id': 'Area' + str(i), 'label': '나의 분야 ' + str(i), 'color': '#123456'} for i in range(12)]}
+        result = m.setup(self.config, self.vault, profile=profile)
+        self.assertTrue(result['doctor']['ok'])
+        self.assertEqual(result['doctor']['domains'], 12)
+        m.register(self.config, self.project, 'client', 'Client website', 'Area11')
+        result = m.record(self.config, self.project, self.data)
+        self.assertIn('Area11', result['note'])
+        self.assertEqual(len(m.read_json(self.vault / 'System/Domain Map.canvas')['nodes']), 12)
+
+    def test_relabel_keeps_routes_and_preserves_unrelated_settings(self):
+        self.setup(); self.register()
+        recorded = Path(m.record(self.config, self.project, self.data)['note'])
+        before = recorded.read_bytes()
+        routes = (self.vault / 'System/projects.json').read_bytes()
+        graph = m.read_json(self.vault / '.obsidian/graph.json')
+        graph['search'] = 'my custom filter'
+        graph['colorGroups'].insert(0, {'query':'tag:#important', 'color':{'a':1,'rgb':1}})
+        m.save(self.vault / '.obsidian/graph.json', graph)
+        m.configure(self.config, {'domains':[{'id':'Development','label':'고객 작업','color':'#112233'}, {'id':'Wellbeing','label':'웰빙','color':'#ABCDEF'}]})
+        self.assertEqual(recorded.read_bytes(), before)
+        self.assertEqual((self.vault / 'System/projects.json').read_bytes(), routes)
+        self.assertIn('# 고객 작업', (self.vault / 'Areas/Development.md').read_text('utf-8'))
+        graph = m.read_json(self.vault / '.obsidian/graph.json')
+        self.assertEqual(graph['search'], 'my custom filter')
+        self.assertEqual(graph['colorGroups'][0]['query'], 'tag:#important')
+        self.assertTrue(m.doctor(self.config)['ok'])
+
+    def test_invalid_profiles_never_write(self):
+        for ident in ('../escape', 'CON', 'Shared', 'foo/bar'):
+            with self.subTest(ident=ident), self.assertRaises(ValueError):
+                m.setup(self.config, self.vault, profile={'domains':[{'id':ident,'label':'Example','color':'#123456'}]})
+            self.assertFalse(self.vault.exists())
+        self.setup()
+        before = {str(p): p.read_bytes() for p in self.vault.rglob('*') if p.is_file()}
+        with self.assertRaises(ValueError):
+            m.configure(self.config, {'domains':[{'id':'A','label':'One','color':'#123456'},{'id':'a','label':'Two','color':'#123456'}]})
+        self.assertEqual(before, {str(p): p.read_bytes() for p in self.vault.rglob('*') if p.is_file()})
+
+    def test_edited_navigation_is_not_overwritten(self):
+        self.setup(); self.register()
+        area = self.vault / 'Areas/Development.md'
+        area.write_text(area.read_text('utf-8') + '\nMy own text', encoding='utf-8')
+        before = {str(p): p.read_bytes() for p in self.vault.rglob('*') if p.is_file()}
+        with self.assertRaisesRegex(ValueError, 'User-edited'):
+            m.configure(self.config, {'domains':[{'id':'Development','label':'New label','color':'#123456'}]})
+        self.assertEqual(before, {str(p): p.read_bytes() for p in self.vault.rglob('*') if p.is_file()})
+
+    def test_interrupted_configuration_can_retry(self):
+        self.setup()
+        profile = {'domains':[{'id':'Studio','label':'My studio','color':'#123456'}]}
+        real_write = m.write
+        def interrupted(path, content):
+            if path.name == 'Studio.md':
+                raise OSError('simulated interruption')
+            return real_write(path, content)
+        with patch.object(m, 'write', interrupted), self.assertRaises(OSError):
+            m.configure(self.config, profile)
+        self.assertFalse(m.doctor(self.config)['ok'])
+        with self.assertRaisesRegex(ValueError, 'exact profile'):
+            m.configure(self.config, {'domains':[]})
+        m.configure(self.config, profile)
+        self.assertTrue(m.doctor(self.config)['ok'])
+
+    def test_legacy_domains_are_inferred_without_moving_records(self):
+        self.setup(); self.register()
+        record = Path(m.record(self.config, self.project, self.data)['note'])
+        before = record.read_bytes()
+        area = (self.vault / 'Areas/Development.md').read_bytes()
+        canvas = (self.vault / 'Knowledge Map.canvas').read_bytes()
+        for rel in ('System/domains.json','System/Areas.md','System/Domain Map.canvas'):
+            (self.vault / rel).unlink()
+        self.assertEqual(m.domains(self.config)['domains'][0]['id'], 'Development')
+        m.configure(self.config, {'domains':[{'id':'Community','label':'Community','color':'#ABCDEF'}]})
+        self.assertEqual(record.read_bytes(), before)
+        self.assertEqual((self.vault / 'Areas/Development.md').read_bytes(), area)
+        self.assertEqual((self.vault / 'Knowledge Map.canvas').read_bytes(), canvas)
+        self.assertTrue(m.doctor(self.config)['ok'])
 
     def test_setup_is_repeatable_and_preserves_edits(self):
         self.assertTrue(self.setup()['doctor']['ok'])
@@ -110,6 +198,7 @@ class MossTests(unittest.TestCase):
 
     def test_safe_unicode_and_reserved_names(self):
         self.setup()
+        m.configure(self.config, {'domains':[{'id':'Research','label':'Research','color':'#4879C4'}]})
         m.register(self.config, self.project, 'unicode', '실험 Café', 'Research')
         self.data['title'] = 'CON'
         result = m.record(self.config, self.project, self.data)

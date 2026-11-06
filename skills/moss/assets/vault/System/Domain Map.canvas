@@ -1,0 +1,14 @@
+{
+  "nodes": [
+    {
+      "id": "empty",
+      "type": "text",
+      "text": "No categories yet. Add your own when useful.",
+      "x": 0,
+      "y": 0,
+      "width": 480,
+      "height": 180
+    }
+  ],
+  "edges": []
+}

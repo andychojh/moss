@@ -8,7 +8,7 @@
 
 # A small field guide
 
-1. Open [[Home]] and pick a domain, then a project.
+1. Open [[Home]] and pick a project, optionally through one of your areas.
 2. Read relevant records and follow their source evidence.
 3. Resume work in the actual project folder.
 4. Ask Codex to record useful decisions, failures and checks with `$moss`.
@@ -19,10 +19,11 @@ how a decision changed. The writer creates logs and basic hubs; it does not rewr
 the prose in an existing hub or synthesize all cross-project knowledge by itself.
 
 ## Colors
-Research = blue; Development = teal; Competitions = orange; Learning = purple;
-Admissions = pink; Investing = green; Creative = tan; Operations = slate;
-Shared knowledge = dark teal. Unsorted or missing domains use the default color.
-Color means domain, not importance or confidence.
+You choose domain names and colors. [[System/Areas]] is the current legend;
+[[System/Domain Map.canvas]] is generated from your profile. A color means a
+category, not importance or confidence. There is no fixed category list.
+Use `configure --profile` through Codex to add areas or change labels and colors.
+IDs are stable routing keys; relabeling does not move project files or records.
 
 ## Graph and map
 The global graph hides navigation, logs, system files and templates. New records

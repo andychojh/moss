@@ -6,62 +6,6 @@
   "showOrphans": true,
   "colorGroups": [
     {
-      "query": "[domain:Research]",
-      "color": {
-        "a": 1,
-        "rgb": 4749764
-      }
-    },
-    {
-      "query": "[domain:Development]",
-      "color": {
-        "a": 1,
-        "rgb": 3515275
-      }
-    },
-    {
-      "query": "[domain:Competitions]",
-      "color": {
-        "a": 1,
-        "rgb": 14587717
-      }
-    },
-    {
-      "query": "[domain:Learning]",
-      "color": {
-        "a": 1,
-        "rgb": 8811197
-      }
-    },
-    {
-      "query": "[domain:Admissions]",
-      "color": {
-        "a": 1,
-        "rgb": 13596821
-      }
-    },
-    {
-      "query": "[domain:Investing]",
-      "color": {
-        "a": 1,
-        "rgb": 6395974
-      }
-    },
-    {
-      "query": "[domain:Creative]",
-      "color": {
-        "a": 1,
-        "rgb": 11111009
-      }
-    },
-    {
-      "query": "[domain:Operations]",
-      "color": {
-        "a": 1,
-        "rgb": 8226967
-      }
-    },
-    {
       "query": "[domain:Shared]",
       "color": {
         "a": 1,

@@ -2,36 +2,24 @@
 {
   "type": "navigation",
   "wiki_layer": "navigation",
-  "graph_role": "navigation",
-  "cssclasses": [
-    "moss-home"
-  ]
+  "graph_role": "navigation"
 }
 ---
 
 # Moss
 
-> Small notes. Long memory.
-> Start with a project. Keep evidence. Grow what is reusable.
+> Small notes. Long memory. Your work decides the categories.
 
-## Pick a patch
+Start with a project. There are no preset subject areas. If you prefer not to
+categorize yet, register a project without a domain and use Unsorted.
 
-| Domain | What grows here |
-|---|---|
-| [[Areas/Research\|Research]] | Questions, methods and evidence. |
-| [[Areas/Development\|Development]] | Build, test and maintain. |
-| [[Areas/Competitions\|Competitions]] | Requirements, entries and lessons. |
-| [[Areas/Learning\|Learning]] | Courses, books and practice. |
-| [[Areas/Admissions\|Admissions]] | Applications and preparation. |
-| [[Areas/Investing\|Investing]] | Observations, hypotheses and risk. |
-| [[Areas/Creative\|Creative]] | Writing, design and production. |
-| [[Areas/Operations\|Operations]] | Tools, workflows and maintenance. |
+## Your workspace
 
-## Find your way
-
-- [[Knowledge Map.canvas|Visual map]]
+- [[System/Areas|Your areas and colors]]
+- [[System/Domain Map.canvas|Your area map]]
 - [[System/Projects|All projects]]
 - [[System/Records|Task records and revisions]]
+- [[Knowledge Map.canvas|How memory connects]]
 - [[System/Guide|How to use Moss]]
 - [[System/Rules|Writing and linking rules]]
 
@@ -39,4 +27,5 @@
 
 ![[System/Views/Knowledge.base]]
 
-This is an empty starter. Your projects and records appear when you register and save them.
+Ask Codex to help choose a few useful categories, or add them later. All examples
+are optional; no author's interests or records are installed into your vault.
